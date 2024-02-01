@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Encore Ticket System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px 0;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #007B8A;
+        }
+         .ticket-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .ticket-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Encore Ticket Booking</h1>
+    </div>
+
+    <div class="ticket-list">
+        {% for ticket in tickets %}
+            <div class="ticket-item">
+                <div class="ticket-details">
+                    Event: {{ ticket.event }} - Tickets Available: {{ ticket.available }}
+                </div>
+                <button onclick="bookTicket({{ ticket.id }})">Book Ticket</button>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="content">
+        <h2>Predict Ticket Demand</h2>
+        Day of Week (1: Monday, 7: Sunday): <input type="number" id="day" min="1" max="7"><br>
+        Event Type (1: Concert, 2: Theater, 3: Bowling, 4: Car Ride, 5: Speed Train):
+        <input type="number" id="event" min="1" max="5"><br>
+        <button onclick="predictDemand()">Predict Demand</button>
+        <p id="predictionResult"></p>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 Encore Ticket System. All rights reserved.</p>
+    </div>
+
+    <script>
+        function bookTicket(ticketId) {
+            fetch('/book/' + ticketId, {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Ticket booked successfully!');
+                        window.location.reload();
+                    } else {
+                        alert('Failed to book ticket: ' + data.message);
+                    }
+                });
+        }
+
+        function predictDemand() {
+            var day = document.getElementById('day').value;
+            var event = document.getElementById('event').value;
+            fetch('/predict-demand?day=' + day + '&event=' + event)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('predictionResult').innerText = 'Predicted Demand: ' + data.predicted_demand;
+                });
+        }
+    </script>
+</body>
+</html>
